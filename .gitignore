@@ -12,3 +12,5 @@ venv/
 
 # Local infra logs or temporary files
 *.log
+
+*.jsonl
