@@ -14,3 +14,6 @@ venv/
 *.log
 
 *.jsonl
+projects/slm-finetuning/best_lora_adapter/
+projects/slm-finetuning/lora_output/
+projects/slm-finetuning/.cache/
