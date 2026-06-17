@@ -31,7 +31,9 @@ jobs:
 
       - name: Run Local RAG Integration Test
         run: |
-          echo "=== Running RAG Test ==="
+          echo "=== Setting up environment and running RAG Test ==="
           cd projects/local-rag
+          python3 -m venv venv
           source venv/bin/activate
+          pip install -r requirements.txt
           python3 query.py "Is military deferment available for this position?"
