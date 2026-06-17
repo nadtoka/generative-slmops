@@ -25,22 +25,13 @@ jobs:
       with:
         python-version: '3.12' # Standard safe runner version
 
-    # 4. Cache pip dependencies to speed up future runs
-    - name: Cache Pip Dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('projects/slm-finetuning/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-
-    # 5. Install MLOps software stack
+    # 4. Install MLOps software stack
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r projects/slm-finetuning/requirements.txt
 
-    # 6. Run Stages sequentially inside the working directory
+    # 5. Run Stages sequentially inside the working directory
     - name: Execute MLOps Pipeline
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }} # Injected from GitHub Repository Secrets
