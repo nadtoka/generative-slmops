@@ -1,3 +1,6 @@
+### Q: How do you resolve packet drop and connection timeouts on a Docker Swarm overlay network behind an AWS ALB?
+When containers in a Docker Swarm overlay network experience intermittent connection timeouts behind an AWS Application Load Balancer, it is typically caused by an MTU size mismatch due to VXLAN encapsulation overhead. To resolve this, you must explicitly configure the custom overlay network with a reduced MTU by passing `--opt mtu=1450` during the `docker network create` execution, preventing packet fragmentation and traffic drops.
+
 ### Q: How do you recover a Proxmox VE node from a lost quorum state after a network partition?
 When a Proxmox cluster node loses quorum due to network isolation, it switches to read-only mode, disabling VM and container management. To temporarily force quorum locally and restore read-write operations for emergency maintenance, execute `pvecm expected 1` via SSH on the isolated node. This overrides the required cluster vote count down to 1, allowing you to manage local guests until the underlying network partition is resolved.
 
