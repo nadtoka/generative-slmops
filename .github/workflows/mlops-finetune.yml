@@ -16,6 +16,8 @@ jobs:
     # 2. Checkout the repository code
     - name: Checkout Repository
       uses: actions/checkout@v4
+      with:
+        clean: false
 
     # 3. Set up Python environment
     - name: Set up Python
