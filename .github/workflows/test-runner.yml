@@ -2,12 +2,11 @@ name: Test Local AI Runner
 
 on:
   push:
-    branches: [ "main", "master" ]  # Запускати при кожному пуші в головну гілку
+    branches: [ "main" ]
 
 jobs:
   check-environment:
-    # КРИТИЧНО: вказуємо теги твого локального раннера
-    runs-on: [self-hosted, mlops]
+    runs-on: [self-hosted, k12]
 
     steps:
       - name: Checkout repository code
