@@ -1,8 +1,7 @@
 name: Test Local AI Runner
 
 on:
-  push:
-    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   check-environment:
