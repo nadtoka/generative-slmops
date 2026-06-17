@@ -1,3 +1,6 @@
+### Q: How do you recover a Proxmox VE node from a lost quorum state after a network partition?
+When a Proxmox cluster node loses quorum due to network isolation, it switches to read-only mode, disabling VM and container management. To temporarily force quorum locally and restore read-write operations for emergency maintenance, execute `pvecm expected 1` via SSH on the isolated node. This overrides the required cluster vote count down to 1, allowing you to manage local guests until the underlying network partition is resolved.
+
 ### Q: How do you clear Cloudflare cache automatically in a GitHub Actions deployment workflow?
 To automate Cloudflare cache purging during CI/CD, use the official `cloudflare/wrangler-action` or execute a direct `curl` HTTP POST request to the Cloudflare API v4 endpoint. You must pass the `CLOUDFLARE_ZONE_ID` in the URL and authenticate by providing your `CLOUDFLARE_API_TOKEN` as a Bearer token in the request headers, specifying `purge_everything: true` in the JSON payload.
 
