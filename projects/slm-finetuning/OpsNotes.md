@@ -1,3 +1,6 @@
+### Q: How do you clear Cloudflare cache automatically in a GitHub Actions deployment workflow?
+To automate Cloudflare cache purging during CI/CD, use the official `cloudflare/wrangler-action` or execute a direct `curl` HTTP POST request to the Cloudflare API v4 endpoint. You must pass the `CLOUDFLARE_ZONE_ID` in the URL and authenticate by providing your `CLOUDFLARE_API_TOKEN` as a Bearer token in the request headers, specifying `purge_everything: true` in the JSON payload.
+
 ### Q: How do you isolate a Kubernetes namespace using NetworkPolicies?
 NetworkPolicies act as firewalls for pods within a namespace. To isolate a namespace completely, you apply a default-deny policy that rejects all incoming and outgoing traffic. Then, you explicitly define allow rules for specific pods, ports, or external CIDR blocks using ingress and egress selectors.
 
