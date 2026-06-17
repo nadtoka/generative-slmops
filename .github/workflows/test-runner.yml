@@ -1,0 +1,32 @@
+name: Test Local AI Runner
+
+on:
+  push:
+    branches: [ "main", "master" ]  # Запускати при кожному пуші в головну гілку
+
+jobs:
+  check-environment:
+    # КРИТИЧНО: вказуємо теги твого локального раннера
+    runs-on: [self-hosted, mlops]
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Check CPU and System Info
+        run: |
+          echo "=== Інформація про систему ==="
+          uname -a
+          echo "=== Процесор ==="
+          lscpu | grep "Model name"
+
+      - name: Check Docker Availability
+        run: |
+          echo "=== Перевірка Docker ==="
+          docker --version
+          docker ps
+
+      - name: Check Ollama Connection
+        run: |
+          echo "=== Перевірка Ollama API ==="
+          curl http://localhost:11434/api/tags
