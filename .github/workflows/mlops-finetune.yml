@@ -31,15 +31,28 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r projects/slm-finetuning/requirements.txt
 
-    # 5. Run Stages sequentially inside the working directory
-    - name: Execute MLOps Pipeline
-      env:
-        HF_TOKEN: ${{ secrets.HF_TOKEN }} # Injected from GitHub Repository Secrets
+    # 5. Стадія 1: Парсинг маркдауну та оновлення датасету
+    - name: Stage 1 - Parse OpsNotes & Upload Dataset
       run: |
         cd projects/slm-finetuning
-        echo "[Stage 1/3] Parsing OpsNotes and uploading dataset..."
         python3 upload_dataset.py
-        echo "[Stage 2/3] Starting LoRA fine-tuning on GitHub Runner..."
+
+    # 6. Стадія 2: Локальне тренування LoRA на Ryzen 7
+    - name: Stage 2 - Run LoRA Fine-Tuning on CPU
+      run: |
+        cd projects/slm-finetuning
         python3 train_lora.py
-        echo "[Stage 3/3] Uploading trained LoRA adapter to Hugging Face Hub..."
+
+    # 7. Стадія 3: Автоматичний Quality Gate (якщо впаде тут — деплою не буде)
+    - name: Stage 3 - Quality Gate Verification
+      run: |
+        cd projects/slm-finetuning
+        python3 verify_lora.py
+
+    # 8. Стадія 4: Публікація ВАЛІДОВАНОГО адаптера на Hugging Face
+    - name: Stage 4 - Deploy Validated Adapter to Hugging Face
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      run: |
+        cd projects/slm-finetuning
         python3 upload_adapter.py
