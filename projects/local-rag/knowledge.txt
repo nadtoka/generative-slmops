@@ -1,0 +1,3 @@
+Cyber Harbor company is looking for an AI Infrastructure Engineer in Kyiv. This is an on-site role that requires working with physical servers in local data centers (not remote).
+Key requirements include strong practical experience in Linux server administration in production environments, as well as experience assembling and configuring servers with GPUs, NVMe storage, and RAID controllers. Solid networking knowledge (VLANs, routing) is also required.
+Official military deferment (booking) is available for full-time employees. The infrastructure operates in highly secure, isolated (air-gapped) network environments.
