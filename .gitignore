@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Local infra logs or temporary files
+*.log
