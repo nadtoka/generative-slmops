@@ -11,6 +11,8 @@ on:
 jobs:
   train-and-deploy:
     runs-on: [self-hosted, k12]
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
     steps:
     # 2. Checkout the repository code
@@ -51,8 +53,6 @@ jobs:
 
     # 8. Стадія 4: Публікація ВАЛІДОВАНОГО адаптера на Hugging Face
     - name: Stage 4 - Deploy Validated Adapter to Hugging Face
-      env:
-        HF_TOKEN: ${{ secrets.HF_TOKEN }}
       run: |
         cd projects/slm-finetuning
         python3 upload_adapter.py
