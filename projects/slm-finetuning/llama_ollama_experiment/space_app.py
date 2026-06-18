@@ -10,24 +10,13 @@ base_model_path = hf_hub_download(
     filename="custom_devops_llama_q4.gguf"
 )
 
-# 2. Ініціалізуємо рушій llama.cpp з підтримкою нашого локального LoRA адаптера
-print("Initializing LlamaContext with LoRA adapter...")
+# 2. Ініціализируємо рушій llama.cpp з нашого завантаженого моноліту
+print("Initializing LlamaContext...")
 llm = Llama(
     model_path=base_model_path,
-  #  lora_path="./best_lora_adapter.gguf", # Файл адаптера буде лежати в цій же папці на HF
-  #  model_path=custom_model_path,
     n_ctx=2048,
     n_threads=2 # Оптимально для 2 vCPU на безкоштовному тарифі HF
 )
-
-## 1 & 2. Ініціалізуємо рушій одразу з нашого кастомного квантованого моноліту
-## Цей файл автоматично прилетить сюди через GitHub Actions пайплайн
-#print("Initializing LlamaContext with pre-merged custom DevOps model...")
-#llm = Llama(
-#    model_path="custom_devops_llama_q4.gguf", # Файл лежить прямо в корні Спейсу
-#    n_ctx=2048,
-#    n_threads=2 # Оптимально для 2 vCPU на безкоштовному тарифі HF
-#)
 
 # Жорсткий системний промпт Senior DevOps
 SYSTEM_PROMPT = """You are an expert Senior DevOps Engineer, Cloud Architect, and SysAdmin. 
@@ -36,21 +25,38 @@ Always provide concise, highly technical answers. Use clear terminal commands an
 If a user asks about topics outside of IT infrastructure, hardware, or software engineering, gently decline and steer the conversation back to tech."""
 
 def respond(message, chat_history):
-    # Формуємо правильний формат діалогу Llama 3.2 Chat Template
+    # Прибрали подвійний <|begin_of_text|>, довіряємо автоматиці llama-cpp
     prompt = f"<|start_header_id|>system<|end_header_id|>\n\n{SYSTEM_PROMPT}<|eot_id|>"
     
-    for user_msg, bot_msg in chat_history:
-        if user_msg:
-            prompt += f"<|start_header_id|>user<|end_header_id|>\n\n{user_msg}<|eot_id|>"
-        if bot_msg:
-            prompt += f"<|start_header_id|>assistant<|end_header_id|>\n\n{bot_msg}<|eot_id|>"
+    # Захищений Універсальний парсер історії (їсть будь-яку версію Gradio)
+    for item in chat_history:
+        # Варіант А: Старий формат кортежів/списків [[user, bot], [user, bot]]
+        if isinstance(item, (list, tuple)) and len(item) == 2:
+            user_msg, bot_msg = item
+            if user_msg:
+                prompt += f"<|start_header_id|>user<|end_header_id|>\n\n{user_msg}<|eot_id|>"
+            if bot_msg:
+                prompt += f"<|start_header_id|>assistant<|end_header_id|>\n\n{bot_msg}<|eot_id|>"
+        
+        # Варіант Б: Новий формат Gradio 5/6 (словники або об'єкти з полями role/content)
+        else:
+            if isinstance(item, dict):
+                role = item.get("role")
+                content = item.get("content")
+            else:
+                role = getattr(item, "role", None)
+                content = getattr(item, "content", None)
             
+            if role and content:
+                prompt += f"<|start_header_id|>{role}<|end_header_id|>\n\n{content}<|eot_id|>"
+            
+    # Додаємо поточний промпт користувача
     prompt += f"<|start_header_id|>user<|end_header_id|>\n\n{message}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
     
-    # Генерація відповіді за допомогою рушія llama.cpp
+    # Генерація відповіді
     output = llm(
         prompt,
-        max_tokens=1024,
+        max_tokens=1024, # Залишаємо великий ліміт для коду
         temperature=0.2,
         top_p=0.9,
         stop=["<|eot_id|>", "<|start_header_id|>", "user", "assistant"]
@@ -58,18 +64,18 @@ def respond(message, chat_history):
     
     return output["choices"][0]["text"].strip()
 
-# Створення красивого вебінтерфейсу Gradio
-with gr.Blocks(theme=gr.themes.Soft()) as demo:
+# Створення вебінтерфейсу Gradio
+with gr.Blocks() as demo:
     gr.Markdown("# 🦙 Llama 3.2 — Senior DevOps Knowledge Base (LoRA)")
     gr.Markdown("This SLM model has been locally fine-tuned via LoRA on custom DevOps engineering notes and infrastructure documentation.")
     
     chatbot = gr.ChatInterface(
         fn=respond,
-        type="tuples",
+        # Параметр type ПРИБРАЛИ, щоб не тригерити TypeError у Gradio 6.0
         examples=[
             "How to clear a read-only lock on a Micron 9200 MAX SSD?",
             "Deploy Nginx as a reverse proxy for PHP-FPM inside Docker Swarm.",
-            "Привіт! Розкажи, як приготувати класичний український борщ?"
+            "What is the core difference between count and for_each in Terraform?"
         ]
     )
 
