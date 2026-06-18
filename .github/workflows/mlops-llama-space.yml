@@ -57,7 +57,7 @@ jobs:
     - name: Stage 3.5 - Quantize Monolith to Optimized Q4_K_M
       run: |
         cd projects/slm-finetuning/llama_ollama_experiment
-        ~/ai-practice/llama.cpp/llama-quantize ./unquantized_monolith.gguf ./custom_devops_llama_q4.gguf Q4_K_M
+        ~/ai-practice/llama.cpp/build/bin/llama-quantize ./unquantized_monolith.gguf ./custom_devops_llama_q4.gguf Q4_K_M
 
     # СТАДІЯ 4: Заливаємо ОДИН готовий, стиснутий і розумний файл у Спейс
     - name: Stage 4 - Deploy Quantized Monolith to HF Space
