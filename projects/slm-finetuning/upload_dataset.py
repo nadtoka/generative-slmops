@@ -4,7 +4,7 @@ import json
 from huggingface_hub import HfApi
 
 # 1. Path configuration
-NOTES_FILE = "OpsNotes.md"
+NOTES_FILE = "llama_ollama_experiment/OpsNotes.md"
 JSONL_FILE = "dataset.jsonl"
 HF_REPO_NAME = "nadtoka/devops-opsnotes-instructions"
 
