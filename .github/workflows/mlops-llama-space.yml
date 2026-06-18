@@ -1,4 +1,4 @@
-name: MLOps Llama Ollama & Space Pipeline
+name: MLOps Llama Monolith & Space Pipeline
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'projects/slm-finetuning/llama_ollama_experiment/OpsNotes.md'
+      - 'projects/slm-finetuning/llama_ollama_experiment/space_requirements.txt'
 
 jobs:
   llama-train-and-space-deploy:
@@ -29,27 +30,36 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r projects/slm-finetuning/llama_ollama_experiment/requirements.txt
 
-    # СТАДІЯ 1: Парсимо новий великий англійський маніфест за допомогою глобального скрипта
     - name: Stage 1 - Parse Experiment OpsNotes to JSONL
       run: |
         cd projects/slm-finetuning
-        python3 upload_dataset.py --input llama_ollama_experiment/OpsNotes.md --output llama_ollama_experiment/dataset.jsonl || python3 upload_dataset.py
-        if [ -f dataset.jsonl ]; then cp dataset.jsonl llama_ollama_experiment/dataset.jsonl; fi
+        python3 upload_dataset.py
 
-    # СТАДІЯ 2: Запускаємо локальний Llama-тренер всередині його ізольованої папки
     - name: Stage 2 - Run Llama LoRA Fine-Tuning
       run: |
         cd projects/slm-finetuning/llama_ollama_experiment
         python3 train_lora.py
 
-    # СТАДІЯ 3: Компілюємо отриманий LoRA-адаптер в GGUF формат
-    - name: Stage 3 - Compile LoRA to GGUF
+    # СТАДІЯ 2.5: Зшиваємо ваги локально на K12
+    - name: Stage 2.5 - Merge LoRA Weights into Base Model
       run: |
         cd projects/slm-finetuning/llama_ollama_experiment
-        python3 ~/ai-practice/llama.cpp/convert_lora_to_gguf.py ./best_lora_adapter --outfile ./best_lora_adapter.gguf
+        python3 merge_lora.py
 
-    # СТАДІЯ 4: Пушимо новий адаптер у хмару
-    - name: Stage 4 - Deploy GGUF Adapter to HF Space
+    # СТАДІЯ 3: Конвертуємо отриманий моноліт у базовий неквантований GGUF
+    - name: Stage 3 - Convert Monolith to GGUF Format
       run: |
         cd projects/slm-finetuning/llama_ollama_experiment
-        hf upload nadtoka/llama-3.2-devops-notes ./best_lora_adapter.gguf best_lora_adapter.gguf --repo-type=space
+        python3 ~/ai-practice/llama.cpp/convert_hf_to_gguf.py ./merged_hf_model --outfile ./unquantized_monolith.gguf
+
+    # СТАДІЯ 3.5: Квантуємо моноліт на К12 до формату Q4_K_M за 10 секунд
+    - name: Stage 3.5 - Quantize Monolith to Optimized Q4_K_M
+      run: |
+        cd projects/slm-finetuning/llama_ollama_experiment
+        ~/ai-practice/llama.cpp/llama-quantize ./unquantized_monolith.gguf ./custom_devops_llama_q4.gguf Q4_K_M
+
+    # СТАДІЯ 4: Заливаємо ОДИН готовий, стиснутий і розумний файл у Спейс
+    - name: Stage 4 - Deploy Quantized Monolith to HF Space
+      run: |
+        cd projects/slm-finetuning/llama_ollama_experiment
+        hf upload nadtoka/llama-3.2-devops-notes ./custom_devops_llama_q4.gguf custom_devops_llama_q4.gguf --type space

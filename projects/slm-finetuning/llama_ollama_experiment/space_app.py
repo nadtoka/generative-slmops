@@ -3,18 +3,27 @@ import gradio as gr
 from huggingface_hub import hf_hub_download
 from llama_cpp import Llama
 
-# 1. Завантажуємо офіційну базову GGUF модель Llama 3.2 3B Instruct
-print("Downloading base Llama 3.2 GGUF model...")
-base_model_path = hf_hub_download(
-    repo_id="unsloth/Llama-3.2-3B-Instruct-GGUF",
-    filename="Llama-3.2-3B-Instruct-Q4_K_M.gguf"
-)
+## 1. Завантажуємо офіційну базову GGUF модель Llama 3.2 3B Instruct
+#print("Downloading base Llama 3.2 GGUF model...")
+#base_model_path = hf_hub_download(
+#    repo_id="unsloth/Llama-3.2-3B-Instruct-GGUF",
+#    filename="Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+#)
+#
+## 2. Ініціалізуємо рушій llama.cpp з підтримкою нашого локального LoRA адаптера
+#print("Initializing LlamaContext with LoRA adapter...")
+#llm = Llama(
+#    model_path=base_model_path,
+#    lora_path="./best_lora_adapter.gguf", # Файл адаптера буде лежати в цій же папці на HF
+#    n_ctx=2048,
+#    n_threads=2 # Оптимально для 2 vCPU на безкоштовному тарифі HF
+#)
 
-# 2. Ініціалізуємо рушій llama.cpp з підтримкою нашого локального LoRA адаптера
-print("Initializing LlamaContext with LoRA adapter...")
+# 1 & 2. Ініціалізуємо рушій одразу з нашого кастомного квантованого моноліту
+# Цей файл автоматично прилетить сюди через GitHub Actions пайплайн
+print("Initializing LlamaContext with pre-merged custom DevOps model...")
 llm = Llama(
-    model_path=base_model_path,
-    lora_path="./best_lora_adapter.gguf", # Файл адаптера буде лежати в цій же папці на HF
+    model_path="custom_devops_llama_q4.gguf", # Файл лежить прямо в корні Спейсу
     n_ctx=2048,
     n_threads=2 # Оптимально для 2 vCPU на безкоштовному тарифі HF
 )
