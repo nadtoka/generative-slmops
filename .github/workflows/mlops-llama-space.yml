@@ -37,9 +37,9 @@ jobs:
         cd projects/slm-finetuning/llama_ollama_experiment
         CACHE_DIR="/home/onadtoka/ai-practice/pipeline_cache"
         mkdir -p $CACHE_DIR
-
-        CURRENT_HASH=$(md5sum OpsNotes.md | cut -d' ' -f1)
-        echo "💡 Current OpsNotes.md MD5: $CURRENT_HASH"
+        
+        CURRENT_HASH=$(cat OpsNotes.md train_lora.py | md5sum | cut -d' ' -f1)
+        echo "💡 Current Layers Combined MD5: $CURRENT_HASH"
 
         if [ -f "$CACHE_DIR/ops_notes.hash" ] && [ "$(cat $CACHE_DIR/ops_notes.hash)" = "$CURRENT_HASH" ] && [ -f "$CACHE_DIR/custom_devops_llama_q4.gguf" ]; then
           echo "🚀 HIT: No changes in OpsNotes.md. Layer cache matched!"
