@@ -38,8 +38,7 @@ jobs:
     - name: Stage 1 - Parse Experiment OpsNotes
       run: |
         cd projects/slm-finetuning/llama_ollama_experiment
-        # Тут запускається скрипт парсингу, якщо він оновлює локальний jsonl
-        # python3 upload_dataset.py --local-only
+        python3 upload_dataset.py
 
     # 6. Стадія 2: Локальне тренування LoRA для Llama 3.2 на CPU
     - name: Stage 2 - Run Llama LoRA Fine-Tuning
