@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - 'projects/slm-finetuning/llama_ollama_experiment/OpsNotes.md'
-      - 'projects/slm-finetuning/llama_ollama_experiment/space_requirements.txt'
+      - 'projects/slm-finetuning/llama_ollama_experiment/**'
+      - '.github/workflows/mlops-llama-space.yml'
 
 jobs:
   llama-train-and-space-deploy:
@@ -31,33 +31,60 @@ jobs:
         pip install -r projects/slm-finetuning/llama_ollama_experiment/requirements.txt
         pip install sentencepiece tiktoken
 
+    - name: Stage 0 - Check Cache Layers
+      id: cache-check
+      run: |
+        cd projects/slm-finetuning/llama_ollama_experiment
+        CACHE_DIR="/home/onadtoka/ai-practice/pipeline_cache"
+        mkdir -p $CACHE_DIR
+
+        CURRENT_HASH=$(md5sum OpsNotes.md | cut -d' ' -f1)
+        echo "💡 Current OpsNotes.md MD5: $CURRENT_HASH"
+
+        if [ -f "$CACHE_DIR/ops_notes.hash" ] && [ "$(cat $CACHE_DIR/ops_notes.hash)" = "$CURRENT_HASH" ] && [ -f "$CACHE_DIR/custom_devops_llama_q4.gguf" ]; then
+          echo "🚀 HIT: No changes in OpsNotes.md. Layer cache matched!"
+          echo "skip_heavy_steps=true" >> $GITHUB_OUTPUT
+          cp $CACHE_DIR/custom_devops_llama_q4.gguf ./
+        else
+          echo "🔄 MISS: Dataset changed or cache empty. Rebuilding layers..."
+          echo "skip_heavy_steps=false" >> $GITHUB_OUTPUT
+          echo "$CURRENT_HASH" > $CACHE_DIR/ops_notes.hash
+        fi
+
     - name: Stage 1 - Parse Experiment OpsNotes to JSONL
+      if: steps.cache-check.outputs.skip_heavy_steps != 'true'
       run: |
         cd projects/slm-finetuning
         python3 upload_dataset.py
 
     - name: Stage 2 - Run Llama LoRA Fine-Tuning
+      if: steps.cache-check.outputs.skip_heavy_steps != 'true'
       run: |
         cd projects/slm-finetuning/llama_ollama_experiment
         python3 train_lora.py
 
     # СТАДІЯ 2.5: Зшиваємо ваги локально на K12
     - name: Stage 2.5 - Merge LoRA Weights into Base Model
+      if: steps.cache-check.outputs.skip_heavy_steps != 'true'
       run: |
         cd projects/slm-finetuning/llama_ollama_experiment
         python3 merge_lora.py
 
     # СТАДІЯ 3: Конвертуємо отриманий моноліт у базовий неквантований GGUF
     - name: Stage 3 - Convert Monolith to GGUF Format
+      if: steps.cache-check.outputs.skip_heavy_steps != 'true'
       run: |
         cd projects/slm-finetuning/llama_ollama_experiment
         python3 ~/ai-practice/llama.cpp/convert_hf_to_gguf.py ./merged_hf_model --outfile ./unquantized_monolith.gguf
 
     # СТАДІЯ 3.5: Квантуємо моноліт на К12 до формату Q4_K_M за 10 секунд
     - name: Stage 3.5 - Quantize Monolith to Optimized Q4_K_M
+      if: steps.cache-check.outputs.skip_heavy_steps != 'true'
       run: |
         cd projects/slm-finetuning/llama_ollama_experiment
         ~/ai-practice/llama.cpp/build/bin/llama-quantize ./unquantized_monolith.gguf ./custom_devops_llama_q4.gguf Q4_K_M
+        # Дописуємо копіювання в кеш-папку:
+        cp ./custom_devops_llama_q4.gguf /home/onadtoka/ai-practice/pipeline_cache/
 
     # СТАДІЯ 4: Заливаємо ОДИН готовий, стиснутий і розумний файл у Спейс
     - name: Stage 4 - Deploy Quantized Monolith to HF Space
