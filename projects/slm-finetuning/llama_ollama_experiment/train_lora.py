@@ -56,9 +56,9 @@ def main():
 
     print("=== 4. Injecting LoRA Parameters (PEFT) ===")
     peft_config = LoraConfig(
-        r=8,
-        lora_alpha=16,
-        target_modules=["q_proj", "v_proj", "k_proj", "o_proj"],
+        r=32,
+        lora_alpha=64,
+        target_modules=["q_proj", "v_proj", "k_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
         lora_dropout=0.05,
         bias="none",
         task_type=TaskType.CAUSAL_LM
@@ -70,9 +70,10 @@ def main():
     training_args = TrainingArguments(
         output_dir="./lora_output",
         per_device_train_batch_size=1,
-        num_train_epochs=40,         # Loop through our 3 notes 40 times
-        learning_rate=5e-4,
-        logging_steps=5,
+        num_train_epochs=15,         # Loop through our notes 15 times
+        learning_rate=1e-4,
+        weight_decay=0.01,
+        logging_steps=1,
         save_strategy="no",
         use_cpu=True,               # Force execution on your Ryzen 7 cores
         report_to="none"
