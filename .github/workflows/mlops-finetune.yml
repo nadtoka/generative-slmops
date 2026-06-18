@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - 'projects/slm-finetuning/OpsNotes.md'
+      - 'projects/slm-finetuning/llama_ollama_experiment/OpsNotes.md'
 
 jobs:
   train-and-deploy:
