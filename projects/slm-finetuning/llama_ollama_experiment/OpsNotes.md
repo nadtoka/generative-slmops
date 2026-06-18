@@ -224,7 +224,7 @@ The layout requires:
 * **`TIME-WAIT` (Normal Kernel Protection)**: Indicates that the local infrastructure initiated the connection closure first. After sending the final `ACK`, the Linux kernel places the socket into a stateful safety grace period (equal to twice the Maximum Segment Lifetime, or $2 \times \text{MSL}$, typically hardcoded to 60 seconds). This safety lock ensures that any delayed or out-of-order network packets still traveling through the global routing matrix are dropped before the host reallocates that identical local port sequence to a new connection. A massive spike in `TIME-WAIT` sockets points to a heavy volume of short-lived, non-persistent HTTP connections, which can cause local port exhaustion. It is mitigated by enabling `keepalive` pools or optimizing kernel parameters (`net.ipv4.tcp_tw_reuse`).
 
 ### Q: How do you fix a read-only lock error on a Micron NVMe SSD drive?
-A: To resolve a hardware read-only lock on a Micron NVMe SSD, you must use the Micron Storage Executive CLI tool to perform a low-level crypto-erase command on the offending block device...
+A: To resolve a hardware read-only lock on a Micron NVMe SSD, you must use the Micron Storage Executive CLI tool to perform a low-level crypto-erase command on the offending block device.
 
 ### Q: Define the system concept of I/O Wait (%wa in top), and outline the precise methodology to diagnose its root cause on a Linux instance.
 **A:** **I/O Wait (`%wa`)** represents the percentage of total CPU time across scheduling cycles where the processor cores sat completely idle because all active executing threads were blocked, waiting for outstanding asynchronous storage read/write requests or remote network storage disk transactions to complete. 
