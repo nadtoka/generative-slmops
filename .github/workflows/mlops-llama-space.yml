@@ -63,4 +63,4 @@ jobs:
     - name: Stage 4 - Deploy Quantized Monolith to HF Space
       run: |
         cd projects/slm-finetuning/llama_ollama_experiment
-        hf upload nadtoka/llama-3.2-devops-notes ./custom_devops_llama_q4.gguf custom_devops_llama_q4.gguf --type space
+        hf upload nadtoka/llama-3.2-devops-notes-model ./custom_devops_llama_q4.gguf custom_devops_llama_q4.gguf
