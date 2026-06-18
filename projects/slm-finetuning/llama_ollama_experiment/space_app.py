@@ -15,7 +15,7 @@ print("Initializing LlamaContext with LoRA adapter...")
 llm = Llama(
     model_path=base_model_path,
   #  lora_path="./best_lora_adapter.gguf", # Файл адаптера буде лежати в цій же папці на HF
-    model_path=custom_model_path,
+  #  model_path=custom_model_path,
     n_ctx=2048,
     n_threads=2 # Оптимально для 2 vCPU на безкоштовному тарифі HF
 )
