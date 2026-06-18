@@ -52,4 +52,4 @@ jobs:
     - name: Stage 4 - Deploy GGUF Adapter to HF Space
       run: |
         cd projects/slm-finetuning/llama_ollama_experiment
-        huggingface-cli upload nadtoka/llama-3.2-devops-notes ./best_lora_adapter.gguf best_lora_adapter.gguf --repo-type=space
+        hf upload nadtoka/llama-3.2-devops-notes ./best_lora_adapter.gguf best_lora_adapter.gguf --repo-type=space
