@@ -86,3 +86,6 @@ Due to architecture specificities in Ollama's dynamic weight layering (where `AD
   * Comprehensive end-to-end execution guide.
 
 For detailed instructions on IAM setup, Hugging Face gating verification, and local runtime provisioning, see the internal [**Llama/Ollama Experiment README**](./llama_ollama_experiment/README.md).
+
+> [!NOTE]
+> **Qwen LoRA Servicing Limitation:** > Local deployment of the Qwen-based LoRA adapter directly via Ollama's dynamic `ADAPTER` layer method is currently frozen. Ollama's runtime layer natively supports dynamic LoRA weights better on Llama-based architectures. For the Qwen workspace, weights must be explicitly merged inside the PyTorch environment prior to GGUF compilation. For an end-to-end working GitOps automated pipeline with live server execution, refer to the alternative `./llama_ollama_experiment/` workspace.
