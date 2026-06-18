@@ -37,7 +37,7 @@ If a user asks about topics outside of IT infrastructure, hardware, or software 
 
 def respond(message, chat_history):
     # Формуємо правильний формат діалогу Llama 3.2 Chat Template
-    prompt = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{SYSTEM_PROMPT}<|eot_id|>"
+    prompt = f"<|start_header_id|>system<|end_header_id|>\n\n{SYSTEM_PROMPT}<|eot_id|>"
     
     for user_msg, bot_msg in chat_history:
         if user_msg:
@@ -50,7 +50,7 @@ def respond(message, chat_history):
     # Генерація відповіді за допомогою рушія llama.cpp
     output = llm(
         prompt,
-        max_tokens=512,
+        max_tokens=1024,
         temperature=0.2,
         top_p=0.9,
         stop=["<|eot_id|>", "<|start_header_id|>", "user", "assistant"]
@@ -65,6 +65,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
     
     chatbot = gr.ChatInterface(
         fn=respond,
+        type="tuples",
         examples=[
             "How to clear a read-only lock on a Micron 9200 MAX SSD?",
             "Deploy Nginx as a reverse proxy for PHP-FPM inside Docker Swarm.",
