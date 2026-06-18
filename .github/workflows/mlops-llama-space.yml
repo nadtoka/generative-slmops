@@ -67,3 +67,32 @@ jobs:
         hf upload nadtoka/llama-3.2-devops-notes-model ./custom_devops_llama_q4.gguf custom_devops_llama_q4.gguf
         # 2. Оновлюємо код у Спейсі: беремо локальний space_app.py і заливаємо його туди як app.py!
         hf upload nadtoka/llama-3.2-devops-notes ./space_app.py app.py --type space
+    
+    # СТАДІЯ 5: Оновлюємо модель у локальному Ollama для домашнього Open WebUI
+    - name: Stage 5 - Update Local Ollama Engine
+      run: |
+        cd projects/slm-finetuning/llama_ollama_experiment
+
+        # Створюємо тимчасовий конфіг, зберігаючи твій системний промпт та тюнінг
+        cat << 'EOF' > Modelfile.ollama
+        # 1. Беремо наш новий, локально зшитий і квантований моноліт
+        FROM ./custom_devops_llama_q4.gguf
+
+        # 2. Твій фірмовий системний контекст Senior DevOps для Open WebUI
+        SYSTEM """You are an expert Senior DevOps Engineer, Cloud Architect, and SysAdmin.
+        Your primary focus is Kubernetes, Docker, AWS, Linux, Terraform, and CI/CD pipelines.
+        Always provide concise, highly technical answers. Use clear terminal commands and code blocks.
+        If a user asks about topics outside of IT infrastructure, hardware, or software engineering, gently decline and steer the conversation back to tech."""
+
+        # 3. Тюнінг продуктивності та детермінованості
+        PARAMETER num_ctx 4096
+        PARAMETER temperature 0.2
+        PARAMETER top_p 0.9
+        PARAMETER stop <|eot_id|>
+        EOF
+
+        # 4. Оновлюємо локальний двигун Ollama через тимчасовий конфіг
+        ollama create devops-llama:latest -f Modelfile.ollama
+
+        # Чистимо за собою сміття
+        rm Modelfile.ollama
