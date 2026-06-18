@@ -63,4 +63,7 @@ jobs:
     - name: Stage 4 - Deploy Quantized Monolith to HF Space
       run: |
         cd projects/slm-finetuning/llama_ollama_experiment
+        # 1. Заливаємо 2 ГБ бінарник у безлімітне сховище моделей
         hf upload nadtoka/llama-3.2-devops-notes-model ./custom_devops_llama_q4.gguf custom_devops_llama_q4.gguf
+        # 2. Оновлюємо код у Спейсі: беремо локальний space_app.py і заливаємо його туди як app.py!
+        hf upload nadtoka/llama-3.2-devops-notes ./space_app.py app.py --type space
