@@ -3,14 +3,14 @@ import gradio as gr
 from huggingface_hub import hf_hub_download
 from llama_cpp import Llama
 
-# 1. Завантажуємо офіційну базову GGUF модель Llama 3.2 3B Instruct
+# 1. Завантажуємо наш моноліт із безлімітного Model Registry
 print("Downloading base Llama 3.2 GGUF model...")
 base_model_path = hf_hub_download(
     repo_id="nadtoka/llama-3.2-devops-notes-model",
     filename="custom_devops_llama_q4.gguf"
 )
 
-# 2. Ініціализируємо рушій llama.cpp з нашого завантаженого моноліту
+# 2. Ініціалізуємо рушій llama.cpp
 print("Initializing LlamaContext...")
 llm = Llama(
     model_path=base_model_path,
@@ -25,20 +25,16 @@ Always provide concise, highly technical answers. Use clear terminal commands an
 If a user asks about topics outside of IT infrastructure, hardware, or software engineering, gently decline and steer the conversation back to tech."""
 
 def respond(message, chat_history):
-    # Прибрали подвійний <|begin_of_text|>, довіряємо автоматиці llama-cpp
     prompt = f"<|start_header_id|>system<|end_header_id|>\n\n{SYSTEM_PROMPT}<|eot_id|>"
     
-    # Захищений Універсальний парсер історії (їсть будь-яку версію Gradio)
+    # Універсальний парсер історії під будь-яку версію Gradio
     for item in chat_history:
-        # Варіант А: Старий формат кортежів/списків [[user, bot], [user, bot]]
         if isinstance(item, (list, tuple)) and len(item) == 2:
             user_msg, bot_msg = item
             if user_msg:
                 prompt += f"<|start_header_id|>user<|end_header_id|>\n\n{user_msg}<|eot_id|>"
             if bot_msg:
                 prompt += f"<|start_header_id|>assistant<|end_header_id|>\n\n{bot_msg}<|eot_id|>"
-        
-        # Варіант Б: Новий формат Gradio 5/6 (словники або об'єкти з полями role/content)
         else:
             if isinstance(item, dict):
                 role = item.get("role")
@@ -50,13 +46,11 @@ def respond(message, chat_history):
             if role and content:
                 prompt += f"<|start_header_id|>{role}<|end_header_id|>\n\n{content}<|eot_id|>"
             
-    # Додаємо поточний промпт користувача
     prompt += f"<|start_header_id|>user<|end_header_id|>\n\n{message}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
     
-    # Генерація відповіді
     output = llm(
         prompt,
-        max_tokens=1024, # Залишаємо великий ліміт для коду
+        max_tokens=1024,
         temperature=0.2,
         top_p=0.9,
         stop=["<|eot_id|>", "<|start_header_id|>", "user", "assistant"]
@@ -71,7 +65,7 @@ with gr.Blocks() as demo:
     
     chatbot = gr.ChatInterface(
         fn=respond,
-        # Параметр type ПРИБРАЛИ, щоб не тригерити TypeError у Gradio 6.0
+        cache_examples=False, # 🔥 ОЦЕЙ РЯДОК РЯТУЄ ВІД SegFault (Exit code 139)!
         examples=[
             "How to clear a read-only lock on a Micron 9200 MAX SSD?",
             "Deploy Nginx as a reverse proxy for PHP-FPM inside Docker Swarm.",
