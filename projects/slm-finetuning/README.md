@@ -69,3 +69,20 @@ To run a side-by-side verification locally:
 cd projects/slm-finetuning
 source venv/bin/activate
 python3 verify_lora.py
+
+---
+
+## 🔬 Alternative & Runtime Experiments
+
+### 🦙 Ollama Integration via Llama 3.2
+If your goal is to seamlessly serve your fine-tuned DevOps model inside a local **Ollama** runtime environment (and leverage tools like Open WebUI), we have provisioned an isolated experimental playground.
+
+Due to architecture specificities in Ollama's dynamic weight layering (where `ADAPTER` directives natively support Llama architectures better than Qwen), this sub-project shifts the training baseline to Meta's Llama.
+
+* **Workspace Location:** [`./llama_ollama_experiment/`](./llama_ollama_experiment/)
+* **Features:**
+  * Fully isolated training pipeline configured for `Llama-3.2-3B-Instruct`.
+  * Dedicated `Modelfile` syntax for building native Ollama layers without manual GGUF merging.
+  * Comprehensive end-to-end execution guide.
+
+For detailed instructions on IAM setup, Hugging Face gating verification, and local runtime provisioning, see the internal [**Llama/Ollama Experiment README**](./llama_ollama_experiment/README.md).

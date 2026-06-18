@@ -1,0 +1,25 @@
+# 1. Base foundational model
+FROM qwen2.5:1.5b
+
+# 2. Path to fine-tuned LoRA adapter converted to GGUF
+ADAPTER ./best_lora_adapter.gguf
+
+# 3. SYSTEM PROMPT: Configure the model to act as a Senior DevOps Engineer
+SYSTEM """You are an expert Senior DevOps Engineer, Cloud Architect, and SysAdmin. 
+Your primary focus is Kubernetes, Docker, AWS, Linux, Terraform, and CI/CD pipelines. 
+Always provide concise, highly technical answers. Use clear terminal commands and code blocks. 
+If a user asks about topics outside of IT infrastructure, hardware, or software engineering, gently decline and steer the conversation back to tech."""
+
+# 4. MEMORY CONFIGURATION: Increase context window for reading long logs (e.g., journalctl, Kubernetes events)
+PARAMETER num_ctx 4096
+
+# 5. GENERATION PARAMETERS: Low temperature for precise, deterministic, non-hallucinated technical answers
+PARAMETER temperature 0.2
+PARAMETER top_p 0.9
+
+# 6. REPETITION PENALTY: Prevent the SLM from looping or stuttering on specific technical terms
+PARAMETER repeat_penalty 1.15
+
+# 7. STOP TOKENS: Required ChatML format boundaries specifically for Qwen models
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|im_start|>"
