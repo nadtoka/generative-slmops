@@ -54,7 +54,7 @@ jobs:
     - name: Stage 1 - Parse Experiment OpsNotes to JSONL
       if: steps.cache-check.outputs.skip_heavy_steps != 'true'
       run: |
-        cd projects/slm-finetuning
+        cd projects/slm-finetuning/llama_ollama_experiment
         python3 upload_dataset.py
 
     - name: Stage 2 - Run Llama LoRA Fine-Tuning

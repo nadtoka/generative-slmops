@@ -3,28 +3,43 @@ import re
 import json
 from huggingface_hub import HfApi
 
-# Відновлюємо старі базові шляхи кореня
-NOTES_FILE = "llama_ollama_experiment/OpsNotes.md"
+# ФІКС ШЛЯХІВ: тепер усе лежить в одній папці експерименту
+NOTES_FILE = "OpsNotes.md"
 JSONL_FILE = "dataset.jsonl"
 HF_REPO_NAME = "nadtoka/devops-opsnotes-instructions"
+
+SYSTEM_PROMPT = """You are an expert Senior DevOps Engineer, Cloud Architect, and SysAdmin. 
+Your primary focus is Kubernetes, Docker, AWS, Linux, Terraform, and CI/CD pipelines. 
+Always provide concise, highly technical answers. Use clear terminal commands and code blocks. 
+If a user asks about topics outside of IT infrastructure, hardware, or software engineering, gently decline and steer the conversation back to tech."""
 
 def parse_markdown_notes(file_path):
     print(f"Reading and parsing {file_path}...")
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
     
-    # Повертаємо назад старий регекс, який очікує оригінальна модель Qwen
-    pattern = re.compile(r"### Q:\s*(.*?)\n(.*?\n)(?=(### Q:|$))", re.DOTALL)
-    matches = pattern.findall(content)
-    
+    sections = content.split("### Q:")
     dataset_rows = []
-    for match in matches:
-        question = match[0].strip()
-        answer = match[1].strip()
+    
+    for section in sections[1:]:
+        if not section.strip():
+            continue
+            
+        lines = section.strip().split("\n")
+        question = lines[0].strip()
+        
+        raw_answer_lines = lines[1:]
+        cleaned_answer_lines = []
+        for line in raw_answer_lines:
+            if line.strip().startswith("##") or line.strip() == "---":
+                continue
+            cleaned_answer_lines.append(line)
+            
+        answer = "\n".join(cleaned_answer_lines).strip()
+        
         if question and answer:
             dataset_rows.append({
-                # Повертаємо оригінальний короткий системний промпт Qwen
-                "instruction": "You are an expert DevOps and Infrastructure Engineer. Answer the following technical question accurately.",
+                "instruction": SYSTEM_PROMPT,
                 "input": question,
                 "output": answer
             })
@@ -61,7 +76,7 @@ def main():
         repo_id=HF_REPO_NAME,
         repo_type="dataset"
     )
-    print("✅ Success! Base Qwen Dataset restored.")
+    print("✅ Success! Llama Dataset file is uploaded.")
 
 if __name__ == "__main__":
     main()
