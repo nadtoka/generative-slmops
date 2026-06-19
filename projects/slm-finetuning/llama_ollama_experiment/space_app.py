@@ -25,16 +25,15 @@ Always provide concise, highly technical answers. Use clear terminal commands an
 If a user asks about topics outside of IT infrastructure, hardware, or software engineering, gently decline and steer the conversation back to tech."""
 
 def respond(message, chat_history):
-    prompt = f"<|start_header_id|>system<|end_header_id|>\n\n{SYSTEM_PROMPT}<|eot_id|>"
+    # 1. Формуємо нативний список повідомлень (ідентично до train_lora.py)
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     
-    # Універсальний парсер історії під будь-яку версію Gradio
+    # Наш універсальний парсер історії Gradio 6
     for item in chat_history:
         if isinstance(item, (list, tuple)) and len(item) == 2:
             user_msg, bot_msg = item
-            if user_msg:
-                prompt += f"<|start_header_id|>user<|end_header_id|>\n\n{user_msg}<|eot_id|>"
-            if bot_msg:
-                prompt += f"<|start_header_id|>assistant<|end_header_id|>\n\n{bot_msg}<|eot_id|>"
+            if user_msg: messages.append({"role": "user", "content": user_msg})
+            if bot_msg:  messages.append({"role": "assistant", "content": bot_msg})
         else:
             if isinstance(item, dict):
                 role = item.get("role")
@@ -42,21 +41,22 @@ def respond(message, chat_history):
             else:
                 role = getattr(item, "role", None)
                 content = getattr(item, "content", None)
-            
             if role and content:
-                prompt += f"<|start_header_id|>{role}<|end_header_id|>\n\n{content}<|eot_id|>"
-            
-    prompt += f"<|start_header_id|>user<|end_header_id|>\n\n{message}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+                messages.append({"role": role, "content": content})
+                
+    # Додаємо поточний запит користувача
+    messages.append({"role": "user", "content": message})
     
-    output = llm(
-        prompt,
+    # 2. Викликаємо нативний Chat Completion рушія llama.cpp
+    # Він автоматично візьме вбудований чат-шаблон Llama 3.2 із твого GGUF моноліту!
+    response = llm.create_chat_completion(
+        messages=messages,
         max_tokens=1024,
         temperature=0.2,
-        top_p=0.9,
-        stop=["<|eot_id|>", "<|start_header_id|>", "user", "assistant"]
+        top_p=0.9
     )
     
-    return output["choices"][0]["text"].strip()
+    return response["choices"][0]["message"]["content"].strip()
 
 # Створення вебінтерфейсу Gradio
 with gr.Blocks() as demo:

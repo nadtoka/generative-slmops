@@ -13,18 +13,25 @@ def parse_markdown_notes(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
     
-    # Regex to extract Questions (### Q:) and their corresponding Answers
-    pattern = re.compile(r"### Q:\s*(.*?)\n(.*?\n)(?=(### Q:|$))", re.DOTALL)
-    matches = pattern.findall(content)
-    
+    # Розбиваємо файл по заголовках третього рівня (###)
+    sections = content.split("###")
     dataset_rows = []
-    for match in matches:
-        question = match[0].strip()
-        answer = match[1].strip()
+    
+    # Перший елемент - це вступ або заголовок файлу, пропускаємо його
+    for section in sections[1:]:
+        lines = section.strip().split("\n")
+        if not lines:
+            continue
+            
+        # Перший рядок секції — це твій інженерний заголовок (питання/тема)
+        question = lines[0].strip()
+        # Все інше — це контент нотатки (відповідь/інструкція)
+        answer = "\n".join(lines[1:]).strip()
+        
         if question and answer:
             dataset_rows.append({
                 "instruction": "You are an expert DevOps and Infrastructure Engineer. Answer the following technical question accurately.",
-                "input": question,
+                "input": f"Explain the concept and practical usage of: {question}",
                 "output": answer
             })
             
