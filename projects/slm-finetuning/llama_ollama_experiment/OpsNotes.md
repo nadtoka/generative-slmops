@@ -274,7 +274,7 @@ Integrating HashiCorp Vault as an automated SSH CA linked to a central LDAP dire
 
 ### Q: Detail the optimal structural allocation of competencies required to build a balanced, production-grade MLOps team.
 **A:** Transitioning an AI product from a local research sandbox into an enterprise-grade cloud production grid requires moving away from data scientist silos. A mature MLOps team should scale across the following allocation of engineering competencies:
-* **Data Engineers (30%)**: The foundational majority. They construct and maintain scalable, automated ingestion pipelines, structure feature extraction meshes, and manage central Feature Stores.
+* **Data Engineers (30%)**: The foundational majority. They construct and maintainn scalable, automated ingestion pipelines, structure feature extraction meshes, and manage central Feature Stores.
 * **Data Scientists (20%)**: Explore algorithmic architectures, optimize mathematical hyperparameters, and refine the core model baseline logic within sandbox environments.
 * **Software Engineers (20%)**: Architect the non-ML application ecosystem, wrapping raw model outputs in resilient backend APIs and building user interfaces.
 * **Machine Learning (ML) Engineers (20%)**: Productize sandboxed models; handle optimization workflows, model quantization profiles (GGUF/AWQ compilation), and manage scalable deployment pipelines.
