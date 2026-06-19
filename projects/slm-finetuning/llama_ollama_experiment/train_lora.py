@@ -33,7 +33,7 @@ class NativeOpsNotesDataset(TorchDataset):
         
         # Format tokens strictly according to Qwen2.5 guidelines
         full_text = self.tokenizer.apply_chat_template(messages, tokenize=False)
-        tokenized = self.tokenizer(full_text, truncation=True, max_length=256)
+        tokenized = self.tokenizer(full_text, truncation=True, max_length=1024)
         
         # Copy input_ids to labels for Causal Language Modeling
         tokenized["labels"] = tokenized["input_ids"].copy()
